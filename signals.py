@@ -29,35 +29,29 @@ def bollinger(series, period=20, std_mult=2):
 
 # FUNCIÓN PRINCIPAL
 
-
 def make_signals(df):
-    """Recibe DataFrame con columna 'close' y devuelve señales de compra/venta"""
+    """Devuelve el dataset original + columnas buy_signal y sell_signal."""
     data = df.copy()
 
-    # Calcular indicadores
-    data['RSI'] = rsi(data['close'])
-    data['EMA'] = ema(data['close'])
-    data['BB_mid'], data['BB_up'], data['BB_low'] = bollinger(data['close'])
+    # Calcular los tres indicadores
+    rsi_values = rsi(data['close'])
+    ema_values = ema(data['close'])
+    bb_up, bb_low = bollinger(data['close'])
 
-    # Condiciones de compra (BUY) por indicador
-    rsi_buy = data['RSI'] < 30
-    ema_buy = data['close'] > data['EMA']
-    bb_buy = data['close'] < data['BB_low']
+    # Señales de compra por indicador
+    rsi_buy = rsi_values < 30
+    ema_buy = data['close'] > ema_values
+    bb_buy = data['close'] < bb_low
 
-    # Condiciones de venta (SELL) por indicador
-    rsi_sell = data['RSI'] > 70
-    ema_sell = data['close'] < data['EMA']
-    bb_sell = data['close'] > data['BB_up']
+    # Señales de venta por indicador
+    rsi_sell = rsi_values > 70
+    ema_sell = data['close'] < ema_values
+    bb_sell = data['close'] > bb_up
 
-    # Regla 2 de 3 → si 2 o más indicadores coinciden
+    # Confirmación 2 de 3
     data['buy_signal'] = (rsi_buy + ema_buy + bb_buy) >= 2
     data['sell_signal'] = (rsi_sell + ema_sell + bb_sell) >= 2
 
-    # Señal compacta (+1 compra, -1 venta, 0 nada)
-    data['signal'] = 0
-    data.loc[data['buy_signal'], 'signal'] = 1
-    data.loc[data['sell_signal'], 'signal'] = -1
-
-    return data
-
+    # Devuelve solo las dos columnas de señales
+    return data[['buy_signal', 'sell_signal']]
 
