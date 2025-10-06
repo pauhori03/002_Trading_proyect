@@ -28,30 +28,29 @@ def bollinger(series, period=20, std_mult=2):
 
 
 # FUNCIÓN PRINCIPAL
-
 def make_signals(df):
-    """Devuelve el dataset original + columnas buy_signal y sell_signal."""
+    """Recibe un DataFrame con 'close' y devuelve el mismo + columnas de señales."""
     data = df.copy()
 
-    # Calcular los tres indicadores
-    rsi_values = rsi(data['close'])
-    ema_values = ema(data['close'])
-    bb_up, bb_low = bollinger(data['close'])
+    # Calcular indicadores (internamente)
+    rsi_vals = rsi(data['close'])
+    ema_vals = ema(data['close'])
+    bb_mid, bb_up, bb_low = bollinger(data['close'])
 
-    # Señales de compra por indicador
-    rsi_buy = rsi_values < 30
-    ema_buy = data['close'] > ema_values
+    # Condiciones de compra (BUY)
+    rsi_buy = rsi_vals < 30
+    ema_buy = data['close'] > ema_vals
     bb_buy = data['close'] < bb_low
 
-    # Señales de venta por indicador
-    rsi_sell = rsi_values > 70
-    ema_sell = data['close'] < ema_values
+    # Condiciones de venta (SELL)
+    rsi_sell = rsi_vals > 70
+    ema_sell = data['close'] < ema_vals
     bb_sell = data['close'] > bb_up
 
     # Confirmación 2 de 3
     data['buy_signal'] = (rsi_buy + ema_buy + bb_buy) >= 2
     data['sell_signal'] = (rsi_sell + ema_sell + bb_sell) >= 2
 
-    # Devuelve solo las dos columnas de señales
-    return data[['buy_signal', 'sell_signal']]
+    # Regresar solo dataset original + señales
+    return data[['buy_signal', 'sell_signal']].join(df)
 
