@@ -19,7 +19,7 @@ def rsi(series: pd.Series, period: int = 14) -> pd.Series:
     rsi_vals = 100 - (100 / (1 + rs))
     return rsi_vals
 
-def ema(series: pd.Series, span: int = 50) -> pd.Series:
+def ema(series: pd.Series, span: int = 20) -> pd.Series:
     return series.ewm(span=span, adjust=False).mean()
 
 def bollinger(series: pd.Series, period: int = 20, std_mult: float = 2.0):
@@ -33,10 +33,7 @@ def bollinger(series: pd.Series, period: int = 20, std_mult: float = 2.0):
 # SEÑALES
 # --------------------------
 def make_signals(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Recibe un DataFrame con columna 'close' y devuelve el MISMO dataset
-    + columnas booleanas: ['buy_signal', 'sell_signal'].
-    """
+   
     data = df.copy()
 
     # 0) Validación y limpieza mínima
